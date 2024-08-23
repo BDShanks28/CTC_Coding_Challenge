@@ -1,0 +1,157 @@
+// NOTE: This was made first, but I no longer have the log. One showing a proper signup is at the bottom
+POST http://localhost:8000/signup: {
+  "Network": {
+    "addresses": {
+      "local": {
+        "address": "::1",
+        "family": "IPv6",
+        "port": 53104
+      },
+      "remote": {
+        "address": "::1",
+        "family": "IPv6",
+        "port": 8000
+      }
+    }
+  },
+  "Request Headers": {
+    "content-type": "application/json",
+    "user-agent": "PostmanRuntime/7.41.2",
+    "accept": "*/*",
+    "postman-token": "84a7c486-e913-495d-9858-fe65874ba75f",
+    "host": "localhost:8000",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive",
+    "content-length": "68"
+  },
+  "Request Body": "{\r\n    \"email\":\"user@example.com\",\r\n    \"password\": \"supersecure\"\r\n}",
+  "Response Headers": {
+    "content-type": "text/plain; charset=utf-8",
+    "x-content-type-options": "nosniff",
+    "date": "Fri, 23 Aug 2024 20:00:05 GMT",
+    "content-length": "18"
+  },
+  "Response Body": "Error saving user\n"
+}
+
+
+
+
+
+
+
+
+POST http://localhost:8000/login: {
+  "Network": {
+    "addresses": {
+      "local": {
+        "address": "::1",
+        "family": "IPv6",
+        "port": 53104
+      },
+      "remote": {
+        "address": "::1",
+        "family": "IPv6",
+        "port": 8000
+      }
+    }
+  },
+  "Request Headers": {
+    "content-type": "application/json",
+    "user-agent": "PostmanRuntime/7.41.2",
+    "accept": "*/*",
+    "postman-token": "8f83409c-6c9d-4892-970b-e170d979d112",
+    "host": "localhost:8000",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive",
+    "content-length": "68"
+  },
+  "Request Body": "{\r\n    \"email\":\"user@example.com\",\r\n    \"password\": \"supersecure\"\r\n}",
+  "Response Headers": {
+    "date": "Fri, 23 Aug 2024 20:00:18 GMT",
+    "content-length": "32",
+    "content-type": "text/plain; charset=utf-8"
+  },
+  "Response Body": "{\"token\":\"dummy-token success\"}\n"
+}
+
+
+
+
+
+
+
+
+
+
+POST http://localhost:8000/logout: {
+  "Network": {
+    "addresses": {
+      "local": {
+        "address": "::1",
+        "family": "IPv6",
+        "port": 53104
+      },
+      "remote": {
+        "address": "::1",
+        "family": "IPv6",
+        "port": 8000
+      }
+    }
+  },
+  "Request Headers": {
+    "user-agent": "PostmanRuntime/7.41.2",
+    "accept": "*/*",
+    "postman-token": "e088a06b-9166-4145-9686-d9895e6d4d23",
+    "host": "localhost:8000",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive",
+    "content-length": "0"
+  },
+  "Response Headers": {
+    "date": "Fri, 23 Aug 2024 20:00:24 GMT",
+    "content-length": "30",
+    "content-type": "text/plain; charset=utf-8"
+  },
+  "Response Body": "{\"message\":\"User logged out\"}\n"
+}
+
+
+
+
+
+
+
+
+// Here we see a new user signing up successfully
+POST http://localhost:8000/signup: {
+  "Network": {
+    "addresses": {
+      "local": {
+        "address": "::1",
+        "family": "IPv6",
+        "port": 53130
+      },
+      "remote": {
+        "address": "::1",
+        "family": "IPv6",
+        "port": 8000
+      }
+    }
+  },
+  "Request Headers": {
+    "content-type": "application/json",
+    "user-agent": "PostmanRuntime/7.41.2",
+    "accept": "*/*",
+    "postman-token": "ee72e7a7-404d-44ac-859c-23c4dc4b58ca",
+    "host": "localhost:8000",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive",
+    "content-length": "69"
+  },
+  "Request Body": "{\r\n    \"email\":\"usersample@example.com\",\r\n    \"password\": \"secure\"\r\n}",
+  "Response Headers": {
+    "date": "Fri, 23 Aug 2024 20:03:04 GMT",
+    "content-length": "0"
+  }
+}
