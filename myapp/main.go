@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -38,6 +39,8 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	response := map[string]string{"message": "User successfully signed up"}
+	json.NewEncoder(w).Encode(response)
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -54,28 +57,42 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	var storedHash string
 	err := db.QueryRow("SELECT password_hash FROM users WHERE email = $1", user.Email).Scan(&storedHash)
 	if err != nil {
-		http.Error(w, "User not found", http.StatusUnauthorized)
+		if err == sql.ErrNoRows {
+			http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+			return
+		}
+		http.Error(w, "Error checking credentials", http.StatusInternalServerError)
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(user.Password))
 	if err != nil {
-		http.Error(w, "Invalid password", http.StatusUnauthorized)
+		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
 		return
 	}
 
-	// Simplified token generation for user to log in
-	token := "dummy-token success"
-	json.NewEncoder(w).Encode(map[string]string{"token": token})
+	// On successful login, set a session cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:    "session_token",
+		Value:   "some-token", // Replace with a real session token
+		Expires: time.Now().Add(24 * time.Hour),
+		Path:    "/",
+	})
+
+	// Respond with a redirect to the congrats page
+	http.Redirect(w, r, "/congrats", http.StatusSeeOther)
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	// Invalidate the token on the client-side.
-	w.WriteHeader(http.StatusOK)
+	// Clear the session cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:    "session_token",
+		Value:   "",
+		Expires: time.Now().Add(-1 * time.Hour), // Expire the cookie immediately
+		Path:    "/",
+	})
 
-	// POST information to determine if logout was successful
-	response := map[string]string{"message": "User logged out"}
-	json.NewEncoder(w).Encode(response)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func main() {
@@ -87,10 +104,30 @@ func main() {
 	}
 	defer db.Close()
 
+	err = db.Ping()
+	if err != nil {
+		log.Fatal("Cannot connect to the database: ", err)
+	}
+
 	router := mux.NewRouter()
+
+	// Serve static files
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
+	// Serve the main HTML file
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/index.html")
+	}).Methods("GET")
+
+	// Serve the congrats page
+	router.HandleFunc("/congrats", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/congrats.html")
+	}).Methods("GET")
+
 	router.HandleFunc("/signup", signupHandler).Methods("POST")
 	router.HandleFunc("/login", loginHandler).Methods("POST")
 	router.HandleFunc("/logout", logoutHandler).Methods("POST")
 
+	log.Println("Server started at http://localhost:8000")
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
