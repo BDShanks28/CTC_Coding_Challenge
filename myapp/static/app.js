@@ -41,12 +41,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     body: JSON.stringify({ email: email, password: password })
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text); });
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    document.getElementById('message').textContent = data.message;
+                    message.textContent = data.message;
+                    message.style.color = 'green';
                 })
                 .catch(error => {
-                    document.getElementById('message').textContent = 'Error: ' + error.message;
+                    message.textContent = error.message;
+                    message.style.color = 'red';
                 });
             });
         }
@@ -68,17 +75,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => {
                     if (response.redirected) {
                         window.location.href = response.url;
-                    } else {
+                    }
+                    else if (!response.ok){
+                        return response.text().then(text => {throw new Error(text); });;
+                    }
+                    else {
                         return response.json();
                     }
                 })
                 .then(data => {
                     if (data && data.message) {
-                        document.getElementById('message').textContent = data.message;
+                        message.textContent = data.message;
+                        message.style.color = 'green';
                     }
                 })
                 .catch(error => {
-                    document.getElementById('message').textContent = 'Error: ' + error.message;
+                    message.textContent = error.message;
+                    message.style.color = 'red';
                 });
             });
         }

@@ -3,10 +3,8 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -73,10 +71,10 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// On successful login, set a session cookie
+	// On successful login, sets a session cookie
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
-		Value:   "some-token", // Replace with a real session token
+		Value:   "some-token",
 		Expires: time.Now().Add(24 * time.Hour),
 		Path:    "/",
 	})
@@ -98,13 +96,7 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbName := os.Getenv("DB_NAME")
-
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
+	connStr := "user=postgres password=johnD03! dbname=user_login sslmode=disable"
 
 	var err error
 	db, err = sql.Open("postgres", connStr)
