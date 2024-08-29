@@ -9,14 +9,22 @@ import (
 	"os"
 	"time"
 
+	"github.com/joho/godotenv"
+
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var db *sql.DB
+var err error
 
 func signupHandler(w http.ResponseWriter, r *http.Request) {
+	if db == nil {
+		http.Error(w, "Database not initialized", http.StatusInternalServerError)
+		return
+	}
+
 	var user struct {
 		Email    string `json:"email"`
 		Password string `json:password`
@@ -98,14 +106,20 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	godotenv.Load("info.env")
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
 
+	fmt.Println("DB_HOST:", dbHost)
+	fmt.Println("DB_PORT:", dbPort)
+	fmt.Println("DB_USER:", dbUser)
+	fmt.Println("DB_PASSWORD:", dbPassword)
+	fmt.Println("DB_NAME:", dbName)
+
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
-	db, err := sql.Open("postgres", connStr)
 
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
@@ -115,7 +129,7 @@ func main() {
 
 	err = db.Ping()
 	if err != nil {
-		log.Fatal("Cannot connect to the database: ", err)
+		log.Fatal("Error pinging database: ", err)
 	}
 
 	router := mux.NewRouter()

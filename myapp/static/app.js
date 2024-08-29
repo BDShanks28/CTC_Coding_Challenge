@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .catch(error => {
                     message.textContent = error.message;
-                    message.style.color = 'red';
+                    message.style.color = 'black';
                 });
             });
         }
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .catch(error => {
                     message.textContent = error.message;
-                    message.style.color = 'red';
+                    message.style.color = 'black';
                 });
             });
         }
