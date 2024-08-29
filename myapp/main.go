@@ -19,38 +19,57 @@ import (
 var db *sql.DB
 var err error
 
+// Attempt at error handling
+type Response struct {
+	Message string `json:"message"`
+	Status  string `json:"status"`
+}
+
+func sendJSONResponse(w http.ResponseWriter, statusCode int, message string, status string) {
+	response := Response{
+		Message: message,
+		Status:  status,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(response)
+}
+
 func signupHandler(w http.ResponseWriter, r *http.Request) {
 	if db == nil {
-		http.Error(w, "Database not initialized", http.StatusInternalServerError)
+		sendJSONResponse(w, http.StatusInternalServerError, "Database not initialized", "error")
+		return
+	}
+	if r.Method != http.MethodPost {
+		sendJSONResponse(w, http.StatusMethodNotAllowed, "Invalid request method", "error")
 		return
 	}
 
 	var user struct {
 		Email    string `json:"email"`
-		Password string `json:password`
+		Password string `json:"password"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		http.Error(w, "Invalid request", http.StatusBadRequest)
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		sendJSONResponse(w, http.StatusBadRequest, "Invalid request payload", "error")
 		return
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-		http.Error(w, "Error hashing password", http.StatusInternalServerError)
+		sendJSONResponse(w, http.StatusInternalServerError, "Error hashing password", "error")
 		return
 	}
 
 	_, err = db.Exec("INSERT INTO users (email, password_hash) VALUES ($1, $2)", user.Email, string(hashedPassword))
 	if err != nil {
 		log.Printf("Error saving user: %v", err)
-		http.Error(w, "Error saving user", http.StatusInternalServerError)
+		sendJSONResponse(w, http.StatusInternalServerError, "Error saving user", "error")
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	response := map[string]string{"message": "User successfully signed up"}
-	json.NewEncoder(w).Encode(response)
+	sendJSONResponse(w, http.StatusCreated, "Sign up successful!", "success")
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -103,6 +122,16 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func ErrorHandler(w http.ResponseWriter, errMsq string, statusCode int) {
+	response := Response{
+		Message: errMsq,
+		Status:  "error",
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(response)
 }
 
 func main() {

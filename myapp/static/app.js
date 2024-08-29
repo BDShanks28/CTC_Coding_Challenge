@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const signupForm = document.getElementById('signupForm');
     const toggleFormButton = document.getElementById('toggleFormButton');
     const formTitle = document.getElementById('formTitle');
+    const message = document.getElementById('message');
 
     // Congrats Page Elements
     const logoutButton = document.getElementById('logoutButton');
@@ -43,17 +44,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .then(response => {
                     if (!response.ok) {
-                        return response.text().then(text => { throw new Error(text); });
+                        return response.json().then(data => {
+                            throw new Error(data.message);
+                        });
                     }
                     return response.json();
                 })
                 .then(data => {
-                    message.textContent = data.message;
-                    message.style.color = 'green';
+                    if (message) {
+                        message.textContent = data.message;
+                    }
                 })
                 .catch(error => {
-                    message.textContent = error.message;
-                    message.style.color = 'black';
+                    if (message) {
+                        message.textContent = error.message;
+                    }
+                    console.error("Sign up error: ", error);
                 });
             });
         }
@@ -77,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         window.location.href = response.url;
                     }
                     else if (!response.ok){
-                        return response.text().then(text => {throw new Error(text); });;
+                        return response.text().then(text => { throw new Error(text); });
                     }
                     else {
                         return response.json();
@@ -85,13 +91,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .then(data => {
                     if (data && data.message) {
-                        message.textContent = data.message;
-                        message.style.color = 'green';
+                        if (message) {
+                            message.textContent = data.message;
+                        }
                     }
                 })
                 .catch(error => {
-                    message.textContent = error.message;
-                    message.style.color = 'black';
+                    if (message) {
+                        message.textContent = error.message;
+                    }
                 });
             });
         }
